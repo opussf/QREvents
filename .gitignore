@@ -2,4 +2,4 @@
 target/
 QREvents-cf/
 
-*.sublime*
+coverage.xml

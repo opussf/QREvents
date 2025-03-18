@@ -4,7 +4,7 @@ require "wowTest"
 test.outFileName = "testOut.xml"
 test.coberturaFileName = "../coverage.xml"  -- to enable coverage output
 
--- ParseTOC( "../src/QREvent.toc" )
+ParseTOC( "../src/QREvents.toc" )
 
 -- addon setup
 function test.before()

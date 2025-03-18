@@ -1,0 +1,10 @@
+## Title: QREvents
+## Notes: Create QRCodes from calendar evetns (v@VERSION@)
+## Interface: @INTERFACE@
+## Author: opussf
+## Version: @VERSION@
+## Description: Creates a QRCode for calendar events
+## SavedVariables:
+## SavedVariablesPerCharacter:
+## QREvents.lua
+## QREvents.xml

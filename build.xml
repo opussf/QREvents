@@ -121,7 +121,7 @@
 	</target>
 
 	<target name="wow-qrcode">
-		<property name="qrcode-wow.dir" location="${ADDONLOC}/${ant.project.name}"/>
+		<property name="qrcode-wow.dir" location="${ADDONLOC}/qrcode-wow"/>
 		<mkdir dir="${qrcode-wow.dir}"/>
 		<delete>
 			<fileset dir="${qrcode-wow.dir}" includes="*.toc"/>

@@ -14,8 +14,9 @@ end
 
 function QREvents.OnLoad()
 	QREvents_Frame:RegisterEvent("CALENDAR_OPEN_EVENT")
+	QREvents_Frame:RegisterEvent("PLAYER_LOGIN")
 end
-function QREvents.CaptureServerTimeOffset()
+function QREvents.PLAYER_LOGIN()
 	QREvents.realm = GetNormalizedRealmName()
 
 	local serverTT = C_DateAndTime.GetCurrentCalendarTime()  -- 'wonky' time table
@@ -30,15 +31,18 @@ function QREvents.CaptureServerTimeOffset()
 	-- print( "Local Time: "..date("%x %X", myTS) )
 
 	realmDiff = myTS - serverTS
-	realmDiff = (math.ceil(math.abs(realmDiff/3600)) * 3600) * (realmDiff < 0 and -1 or 1)  -- the realm time seems to lag a bit.  Bump it back up to whole hours
+	realmDiff = (math.floor(math.abs(realmDiff/3600)+0.49) * 3600) * (realmDiff < 0 and -1 or 1)  -- the realm time seems to lag a bit.  Bump it back up to whole hours
 
 	QREvents_timediffs[QREvents.realm] = realmDiff
-	-- QREvents_Frame:RegisterEvent("CALENDAR_ACTION_PENDING")
+	for ts, _ in pairs( QREvents_events ) do
+		if ts ~= "now" and ts+(1 * 86400) < time() then
+			QREvents_events[ts] = nil
+		end
+	end
 end
 
 function QREvents.CALENDAR_OPEN_EVENT(self, thing)
 	-- QREvents.Print( "CALENDAR_OPEN_EVENT( "..thing.." )" )
-	QREvents.CaptureServerTimeOffset()
 	local info = C_Calendar.GetEventInfo()
 	if info then
 		local vcalTF = "%Y%m%dT%H%M%S"

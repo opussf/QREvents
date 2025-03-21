@@ -85,6 +85,11 @@
 		<property name="qrcode.dir" location="${working.dir}/qrcode-wow"/>
 		<delete dir="${package.dir}" verbose="false"/>
 		<delete dir="${qrcode.dir}" verbose="false"/>
+		<copy	todir="${working.dir}">
+			<fileset dir=".">
+				<include name="README.md"/>
+			</fileset>
+		</copy>
 		<copy	todir="${package.dir}" filtering="true">
 			<fileset dir="src">
 				<include name="*.lua"/>

@@ -1,6 +1,7 @@
 QREVENTS_SLUG, QREvents = ...
 
 QREvents_events = {}
+QREvents_timediffs = {}
 
 function QREvents.Print( msg, showName)
 	-- print to the chat frame
@@ -13,7 +14,30 @@ end
 
 function QREvents.OnLoad()
 	QREvents_Frame:RegisterEvent("CALENDAR_OPEN_EVENT")
-	-- QREvents_Frame:RegisterEvent("CALENDAR_ACTION_PENDING")
+	QREvents_Frame:RegisterEvent("ADDON_LOADED")
+end
+function QREvents.ADDON_LOADED( ... )
+	if select(2,...) == QREVENTS_SLUG then
+
+		QREvents.realm = GetNormalizedRealmName()
+
+		local serverTT = C_DateAndTime.GetCurrentCalendarTime()  -- 'wonky' time table
+		serverTT.day = serverTT.monthDay
+		serverTT.wday = serverTT.weekday
+		serverTT.min = serverTT.minute
+
+		local serverTS = time( serverTT )
+		local myTS = time()
+
+		-- print( "ServerTime: "..date("%x %X", serverTS) )
+		-- print( "Local Time: "..date("%x %X", myTS) )
+
+		realmDiff = myTS - serverTS
+		realmDiff = (math.ceil(math.abs(realmDiff/3600)) * 3600) * (realmDiff < 0 and -1 or 1)  -- the realm time seems to lag a bit.  Bump it back up to whole hours
+
+		QREvents_timediffs[QREvents.realm] = realmDiff
+		-- QREvents_Frame:RegisterEvent("CALENDAR_ACTION_PENDING")
+	end
 end
 
 function QREvents.CALENDAR_OPEN_EVENT(self, thing)
@@ -27,7 +51,22 @@ function QREvents.CALENDAR_OPEN_EVENT(self, thing)
 		info.time.wday = info.time.weekday
 		info.time.min = info.time.minute
 
-		local start = date( vcalTF, time(info.time) )
+		eventTS = time(info.time)
+		-- print( "EventTime: "..date("%x %X", time(info.time)) )
+
+		local eventRealm = string.match( info.creator, "-(.*)" )
+		eventRealm = eventRealm or QREvents.realm
+
+		-- print( "EventRealm: "..eventRealm )
+
+		if not QREvents_timediffs[eventRealm] then
+			print("Warning: please manually adjust time of event.")
+			print("Log into a character on "..eventRealm.." to regester the realm time.")
+		end
+		local eventStart = time(info.time) + ( QREvents_timediffs[eventRealm] or 0 )
+
+		local start = date( vcalTF, eventStart )
+		-- print( "StartTime: "..date("%x %X", eventStart) )
 
 		local vcal = {}
 		table.insert( vcal, "BEGIN:VCALENDAR" )

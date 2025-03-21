@@ -5,7 +5,7 @@
 ## Version: @VERSION@
 ## Description: Creates a QRCode for calendar events
 ## OptionalDeps: QRCode for WOW
-## SavedVariables: QREvents_events
+## SavedVariables: QREvents_events QREvents_timediffs
 ## SavedVariablesPerCharacter:
 QREvents.lua
 QREvents.xml

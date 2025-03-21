@@ -14,34 +14,31 @@ end
 
 function QREvents.OnLoad()
 	QREvents_Frame:RegisterEvent("CALENDAR_OPEN_EVENT")
-	QREvents_Frame:RegisterEvent("ADDON_LOADED")
 end
-function QREvents.ADDON_LOADED( ... )
-	if select(2,...) == QREVENTS_SLUG then
+function QREvents.CaptureServerTimeOffset()
+	QREvents.realm = GetNormalizedRealmName()
 
-		QREvents.realm = GetNormalizedRealmName()
+	local serverTT = C_DateAndTime.GetCurrentCalendarTime()  -- 'wonky' time table
+	serverTT.day = serverTT.monthDay
+	serverTT.wday = serverTT.weekday
+	serverTT.min = serverTT.minute
 
-		local serverTT = C_DateAndTime.GetCurrentCalendarTime()  -- 'wonky' time table
-		serverTT.day = serverTT.monthDay
-		serverTT.wday = serverTT.weekday
-		serverTT.min = serverTT.minute
+	local serverTS = time( serverTT )
+	local myTS = time()
 
-		local serverTS = time( serverTT )
-		local myTS = time()
+	-- print( "ServerTime: "..date("%x %X", serverTS) )
+	-- print( "Local Time: "..date("%x %X", myTS) )
 
-		-- print( "ServerTime: "..date("%x %X", serverTS) )
-		-- print( "Local Time: "..date("%x %X", myTS) )
+	realmDiff = myTS - serverTS
+	realmDiff = (math.ceil(math.abs(realmDiff/3600)) * 3600) * (realmDiff < 0 and -1 or 1)  -- the realm time seems to lag a bit.  Bump it back up to whole hours
 
-		realmDiff = myTS - serverTS
-		realmDiff = (math.ceil(math.abs(realmDiff/3600)) * 3600) * (realmDiff < 0 and -1 or 1)  -- the realm time seems to lag a bit.  Bump it back up to whole hours
-
-		QREvents_timediffs[QREvents.realm] = realmDiff
-		-- QREvents_Frame:RegisterEvent("CALENDAR_ACTION_PENDING")
-	end
+	QREvents_timediffs[QREvents.realm] = realmDiff
+	-- QREvents_Frame:RegisterEvent("CALENDAR_ACTION_PENDING")
 end
 
 function QREvents.CALENDAR_OPEN_EVENT(self, thing)
 	-- QREvents.Print( "CALENDAR_OPEN_EVENT( "..thing.." )" )
+	QREvents.CaptureServerTimeOffset()
 	local info = C_Calendar.GetEventInfo()
 	if info then
 		local vcalTF = "%Y%m%dT%H%M%S"

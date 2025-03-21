@@ -75,8 +75,8 @@ end
 
 
 SlashCmdList["QRCODE"] = function(msg, editbox)
-    print( (msg=="" and "Empty" or "Not Empty"))
     if msg=="" and QREvents_events and QREvents_events.now then
+        print("Using captured event data")
         msg = QREvents_events.now
     end
     local ok, tab_or_message = qrcode(msg, 1)

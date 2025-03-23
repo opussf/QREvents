@@ -104,7 +104,7 @@ function QREvents.CALENDAR_OPEN_EVENT( self, thing )
 		for _, alarm in ipairs( alarms ) do
 			if alarm then
 				table.insert( vcal, "BEGIN:VALARM" )
-				table.insert( vcal, alarm )
+				table.insert( vcal, "TRIGGER:"..alarm )
 				table.insert( vcal, "ACTION:DISPLAY" )
 				table.insert( vcal, "END:VALARM" )
 			end

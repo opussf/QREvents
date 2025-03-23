@@ -40,8 +40,28 @@ function QREvents.PLAYER_LOGIN()
 		end
 	end
 end
+QREvents.alarms = {
+	{ 7 * 86400, "-P7D" },  -- 7 days
+	{ 86400, "-P1D" },      -- 1 day
+	{ 43200, "-PT12H" },    -- 12 hours
+	{ 21600, "-PT6H" },     -- 6 hours
+	{ 10800, "-PT3H" },     -- 3 hours
+	{ 3600, "-PT1H" },      -- 1 hour
+	{ 1800,	"-PT30M" },     -- 30 minutes
+	{ 900, "-PT15M" },      -- 15 minutes
+	{ 0, nil },              -- end with 2 zeros
+	{ 0, nil },
+}
+function QREvents.DetermineAlarms( eventStart )
+	local now = time()
+	for i, alarmData in ipairs( QREvents.alarms ) do
+		if eventStart - alarmData[1] > now then
+			return QREvents.alarms[i][2], QREvents.alarms[i+1][2]
+		end
+	end
+end
 
-function QREvents.CALENDAR_OPEN_EVENT(self, thing)
+function QREvents.CALENDAR_OPEN_EVENT( self, thing )
 	-- QREvents.Print( "CALENDAR_OPEN_EVENT( "..thing.." )" )
 	local info = C_Calendar.GetEventInfo()
 	if info then
@@ -79,14 +99,17 @@ function QREvents.CALENDAR_OPEN_EVENT(self, thing)
 		table.insert( vcal, "TITLE:"..info.title )
 		table.insert( vcal, "SUMMARY:"..info.description )
 		table.insert( vcal, "LOCATION:"..(info.communityName and info.communityName or info.creator).."-"..eventRealm )
-		table.insert( vcal, "BEGIN:VALARM" )
-		table.insert( vcal, "TRIGGER:-P7D" )
-		table.insert( vcal, "ACTION:DISPLAY" )
-		table.insert( vcal, "END:VALARM" )
-		table.insert( vcal, "BEGIN:VALARM" )
-		table.insert( vcal, "TRIGGER:-P1D" )
-		table.insert( vcal, "ACTION:DISPLAY" )
-		table.insert( vcal, "END:VALARM" )
+
+		local alarms = {QREvents.DetermineAlarms( eventStart )}
+		for _, alarm in ipairs( alarms ) do
+			if alarm then
+				table.insert( vcal, "BEGIN:VALARM" )
+				table.insert( vcal, alarm )
+				table.insert( vcal, "ACTION:DISPLAY" )
+				table.insert( vcal, "END:VALARM" )
+			end
+		end
+
 		table.insert( vcal, "END:VEVENT" )
 		table.insert( vcal, "END:VCALENDAR" )
 
